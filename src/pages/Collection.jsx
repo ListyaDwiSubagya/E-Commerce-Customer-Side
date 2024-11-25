@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { ShopContect } from '../context/ShopContect'
 import { assets } from '../assets/assets';
 import Title from '../components/Title';
-import ProductItem from '../components/productItem';
+import ProductItem from '../components/ProductItem';
 
 const Collection = () => {
 

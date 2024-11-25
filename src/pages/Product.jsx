@@ -11,12 +11,16 @@ const Product = () => {
   const [image, setImage] = useState('');
   const [size, setSize] = useState('');
   
-  const fetchProductData = () => {
-    const product = products.find((item) => item._id === productId);
-    if (product) {
-      setProductData(product);
-      setImage(product.image[0]);
-    }
+  const fetchProductData = async () => {
+   
+    products.map((item) => {
+      if (item._id === productId) {
+          setProductData(item)
+          setImage(item.image[0])
+          console.log(item);
+          return null
+      }
+    })
   };
 
   useEffect(() => {
@@ -52,14 +56,14 @@ const Product = () => {
             <img className='w-3.5' src={assets.star_icon} alt="star" />
             <img className='w-3.5' src={assets.star_icon} alt="star" />
             <img className='w-3.5' src={assets.star_dull_icon} alt="star dull" />
-            <p className='pl-2'>122</p>
+            <p className='pl-2'>(122)</p>
           </div>
           <p className='mt-5 text-3xl font-medium'>{currency}{productData.price}</p>
           <p className='mt-5 text-gray-500 md:w-4/5'>{productData.description}</p>
           <div className='flex flex-col gap-4 my-8'>
             <p>Select Size</p>
             <div className='flex gap-2'>
-              {productData.size && productData.size.map((item, index) => (
+              {productData.sizes.map((item, index) => (
                 <button onClick={() => setSize(item)} className={`border py-2 px-4 bg-gray-100 ${item === size ? 'border-orange-500' : ''}`} key={index}>{item}</button>
               ))}
             </div>
