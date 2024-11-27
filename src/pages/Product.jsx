@@ -8,7 +8,7 @@ import { logout } from '../redux/userSlice'; // Action logout dari userSlice
 
 const Product = () => {
   const { productId } = useParams();
-  const { products, currency, addToCart } = useContext(ShopContect);
+  const { products, currency, addToCart, loading } = useContext(ShopContect); // Destructure loading state if exists
   const [productData, setProductData] = useState(null);
   const [image, setImage] = useState('');
   const [size, setSize] = useState('');
@@ -16,7 +16,7 @@ const Product = () => {
   const dispatch = useDispatch(); // Mendapatkan fungsi dispatch
   const navigate = useNavigate();
 
-  // Mendapatkan data produk
+  // Mendapatkan data produk berdasarkan productId
   const fetchProductData = () => {
     const product = products.find((item) => item._id === productId);
     if (product) {
@@ -26,9 +26,12 @@ const Product = () => {
   };
 
   useEffect(() => {
-    if (products.length > 0) fetchProductData();
+    if (products.length > 0) {
+      fetchProductData();
+    }
   }, [productId, products]);
 
+  // Handle add to cart action
   const handleAddToCart = () => {
     if (!isLoggedIn) {
       // Jika belum login, tampilkan alert dan arahkan ke halaman login
@@ -39,7 +42,15 @@ const Product = () => {
     }
   };
 
-  return productData ? (
+  if (loading) {
+    return <div className='opacity-50'>Loading...</div>; // Show loading state if data is still loading
+  }
+
+  if (!productData) {
+    return <div className='opacity-50'>Product not found!</div>; // Handle case when the product is not found
+  }
+
+  return (
     <div className='border-t-2 pt-10 transition-opacity ease-in duration-500 opacity-100'>
       <div className='flex gap-12 sm:gap-12 flex-col sm:flex-row'>
         {/* Product Images */}
@@ -122,7 +133,7 @@ const Product = () => {
       <RelatedProduct category={productData.category} subCategory={productData.subCategory} />
     
     </div>
-  ) : <div className='opacity-0'>Loading...</div>;
+  );
 };
 
 export default Product;

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { logout } from '../redux/userSlice';  // Action logout
+import { logout } from '../redux/userSlice'; 
 import { assets } from '../assets/assets';
 
 const Navbar = () => {
@@ -59,8 +59,14 @@ const Navbar = () => {
                     {/* Dropdown menu */}
                     <div className='group-hover:block hidden absolute dropdown-menu right-0 pt-4'>
                         <div className='flex flex-col gap-2 w-36 py-3 px-5 bg-slate-100 text-gray-500 rounded'>
-                            <p className='cursor-pointer hover:text-black'>My Profile</p>
-                            <p onClick={handleLogout} className='cursor-pointer hover:text-black'>Logout</p>
+                        {isLoggedIn ? (
+                            <>
+                                <p className='cursor-pointer hover:text-black'>My Profile</p>
+                                <p onClick={handleLogout} className='cursor-pointer hover:text-black'>Logout</p>
+                            </>
+                        ) : (
+                            <p onClick={() => navigate('/login')} className='cursor-pointer hover:text-black'>Login</p>
+                        )}
                         </div>
                     </div>
                 </div>

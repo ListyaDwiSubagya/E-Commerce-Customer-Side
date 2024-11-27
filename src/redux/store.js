@@ -1,13 +1,14 @@
-import { createStore, combineReducers } from 'redux';
-import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit'; // Ganti createStore dengan configureStore
 import userReducer from './userSlice';
 import cartReducer from './cartSlice';
+import productReducer from './productSlice';
 
-const rootReducer = combineReducers({
-  user: userReducer,
-  cart: cartReducer
+const store = configureStore({
+  reducer: {
+    user: userReducer,
+    cart: cartReducer,
+    products: productReducer,
+  },
 });
-
-const store = createStore(rootReducer);
 
 export default store;
