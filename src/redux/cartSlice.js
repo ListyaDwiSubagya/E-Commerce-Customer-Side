@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  cartItems: {}, // Struktur data: { productId: { size: quantity } }
+  cartItems: {}, 
 };
 
 const cartSlice = createSlice({

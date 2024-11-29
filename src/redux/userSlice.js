@@ -1,8 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  isLoggedIn: false, // Menyimpan status login
-  user: null, // Menyimpan data pengguna jika login
+  isLoggedIn: false, 
+  user: null, 
 };
 
 const userSlice = createSlice({
@@ -11,7 +11,7 @@ const userSlice = createSlice({
   reducers: {
     login: (state, action) => {
       state.isLoggedIn = true;
-      state.user = action.payload; // Menyimpan data user
+      state.user = action.payload; 
     },
     logout: (state) => {
       state.isLoggedIn = false;

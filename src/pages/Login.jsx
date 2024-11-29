@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { login } from '../redux/userSlice'; // Import action login
+import { login } from '../redux/userSlice'; 
 
 const Login = () => {
   const [currentState, setCurrentState] = useState('Login');
@@ -11,8 +11,8 @@ const Login = () => {
   const navigate = useNavigate();
 
   // Simulasi data pengguna default untuk demo login
-  const defaultEmail = 'johndoe@example.com'; // Gantilah dengan email yang ada pada fakestoreapi
-  const defaultPassword = '12345'; // Gantilah dengan password yang ada pada fakestoreapi
+  const defaultEmail = 'johndoe@example.com'; 
+  const defaultPassword = '12345'; 
 
   const handleSubmit = async (e) => {
     e.preventDefault();

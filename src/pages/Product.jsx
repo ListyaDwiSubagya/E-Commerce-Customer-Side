@@ -28,16 +28,25 @@ const Product = () => {
     if (product) {
       setProductData(product);
       setImage(product.image);
+      console.log('Selected Product ID:', product.id); // Log ID ke console
     }
-  }, [productId, products]);  
-
+  }, [productId, products]);
+  
   const handleAddToCart = () => {
     if (!isLoggedIn) {
       navigate('/login');
+    } else if (productData) { // Pastikan productData sudah tersedia
+      dispatch(addToCart({ productId: productData.id, size: 'M', quantity: 1 }));
+      console.log('Added to Cart:', {
+        productId: productData.id,
+        size: 'M',
+        quantity: 1,
+      }); // Log data yang ditambahkan ke cart
     } else {
-      dispatch(addToCart({ productId: productData._id, size: 'M', quantity: 1 }));
+      console.error('Product data is not available yet!');
     }
   };
+  
   
   
 
@@ -61,7 +70,7 @@ const Product = () => {
           <h1 className='font-medium text-2xl mt-2'>{productData.title}</h1>
           <div className='flex items-center gap-1 mt-2'>
           </div>
-          <p className='mt-5 text-3xl font-medium'>${productData.price}</p>
+          <p className='mt-4 text-3xl font-medium'>${productData.price}</p>
           <h1 className='text-gray-600 text-xl mt-3'>{productData.category}</h1>
           <p className='mt-5 text-gray-500 md:w-4/5'>{productData.description}</p>
           <button
