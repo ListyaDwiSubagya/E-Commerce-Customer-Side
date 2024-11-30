@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import Title from '../components/Title';
 import { assets } from '../assets/assets';
 import { updateCart } from '../redux/cartSlice';
+import { reduceStock } from '../redux/productSlice'; // Import action untuk mengurangi stok
 import { useNavigate } from 'react-router-dom';
 
 const Cart = () => {
@@ -16,10 +17,9 @@ const Cart = () => {
   const [cartData, setCartData] = useState([]);
   const [subtotal, setSubtotal] = useState(0);
   const [deliveryFee, setDeliveryFee] = useState(0);
+  const [stockWarnings, setStockWarnings] = useState({}); // State untuk menyimpan pesan peringatan stok
 
-  // Mengumpulkan data keranjang berdasarkan state
   useEffect(() => {
-    console.log('Processing Cart Data...');
     if (products.length > 0) {
       const tempData = [];
       let tempSubtotal = 0;
@@ -33,41 +33,80 @@ const Cart = () => {
 
             tempData.push({
               _id: productId,
-              size,
               quantity: cartItems[productId][size],
+              size,
               image: product.image,
               name: product.title,
               price: product.price,
-              total: itemTotal, // Total harga per item
+              stock: product.quantity, // Gunakan stok aktual dari Redux
+              total: itemTotal,
             });
           }
         }
       }
 
-      // Set Subtotal dan Biaya Pengiriman
       setCartData(tempData);
       setSubtotal(tempSubtotal);
 
       // Tentukan biaya pengiriman berdasarkan subtotal
-      if (tempSubtotal > 100) { // Misalnya, jika subtotal lebih dari 100, biaya pengiriman gratis
+      if (tempSubtotal > 100) {
         setDeliveryFee(0);
       } else {
-        setDeliveryFee(10); // Misalnya, biaya pengiriman adalah 10
+        setDeliveryFee(10);
       }
-
-      console.log('Processed Cart Data:', tempData); // Debug hasil data
     }
   }, [cartItems, products]);
 
-  // Mengupdate jumlah item
   const handleQuantityChange = (productId, size, quantity) => {
     if (!quantity || quantity < 1) return;
-    dispatch(updateCart({ productId, size, quantity: Number(quantity) }));
+
+    const product = cartData.find(
+      (item) => item._id === productId && item.size === size
+    );
+
+    if (product && quantity > product.stock) {
+      // Jika jumlah melebihi stok
+      setStockWarnings((prev) => ({
+        ...prev,
+        [`${productId}-${size}`]: `Only ${product.stock} in stock!`,
+      }));
+    } else {
+      // Hapus peringatan jika jumlah valid
+      setStockWarnings((prev) => {
+        const { [`${productId}-${size}`]: _, ...rest } = prev;
+        return rest;
+      });
+
+      dispatch(updateCart({ productId, size, quantity: Number(quantity) }));
+    }
   };
 
-  // Menghapus item dari keranjang
   const handleRemoveItem = (productId, size) => {
     dispatch(updateCart({ productId, size, quantity: 0 }));
+  };
+
+  const handleCheckout = () => {
+    const outOfStockItems = cartData.filter((item) => item.quantity > item.stock);
+
+    if (outOfStockItems.length > 0) {
+      // Tampilkan pesan peringatan untuk item yang stoknya tidak mencukupi
+      const warnings = {};
+      outOfStockItems.forEach((item) => {
+        warnings[`${item._id}-${item.size}`] = `Only ${item.stock} in stock!`;
+      });
+      setStockWarnings(warnings);
+      alert('Some items have insufficient stock. Please adjust your cart.');
+    } else {
+      // Kurangi stok di Redux
+      const itemsToReduce = cartData.map((item) => ({
+        productId: item._id,
+        quantity: item.quantity,
+      }));
+      dispatch(reduceStock({ items: itemsToReduce }));
+
+      // Navigasi ke halaman place-order
+      navigate('/place-order');
+    }
   };
 
   return (
@@ -76,7 +115,6 @@ const Cart = () => {
         <Title text1={'YOUR'} text2={'CART'} />
       </div>
 
-      {/* Jika keranjang kosong */}
       {cartData.length === 0 ? (
         <div className="text-center text-gray-500 mt-10">
           <p>Your cart is empty!</p>
@@ -89,17 +127,15 @@ const Cart = () => {
         </div>
       ) : (
         <div>
-          {/* Daftar produk di keranjang */}
           {cartData.map((item, index) => (
             <div
               key={index}
               className="py-4 border-t text-gray-700 grid grid-cols-[4fr_0.5fr_0.5fr] sm:grid-cols-[4fr_2fr_0.5fr] items-center gap-4"
             >
               <div className="flex items-start gap-6">
-                {/* Gambar produk */}
                 <img
                   className="w-16 sm:w-20"
-                  src={item.image || assets.placeholder_image} // Placeholder jika tidak ada gambar
+                  src={item.image || assets.placeholder_image}
                   alt={item.name || 'Product Image'}
                 />
                 <div>
@@ -109,21 +145,25 @@ const Cart = () => {
                       {currency}
                       {item.price || 'N/A'}
                     </p>
-                    <p className="px-2 sm:px-3 sm:py-1 border bg-slate-50">{item.size}</p>
+                    {stockWarnings[`${item._id}-${item.size}`] && (
+                      <p className="text-red-500 text-xs sm:text-sm font-medium">
+                        {stockWarnings[`${item._id}-${item.size}`]}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
-              {/* Input jumlah */}
-              <input
-                onChange={(e) =>
-                  handleQuantityChange(item._id, item.size, e.target.value)
-                }
-                className="border max-w-10 sm:max-w-20 px-1 sm:px-2 py-1"
-                type="number"
-                min={1}
-                defaultValue={item.quantity}
-              />
-              {/* Tombol hapus */}
+              <div className="flex items-center gap-2">
+                <input
+                  onChange={(e) =>
+                    handleQuantityChange(item._id, item.size, e.target.value)
+                  }
+                  className="border max-w-10 sm:max-w-20 px-1 sm:px-2 py-1"
+                  type="number"
+                  min={1}
+                  defaultValue={item.quantity}
+                />
+              </div>
               <img
                 onClick={() => handleRemoveItem(item._id, item.size)}
                 className="w-4 mr-4 sm:w-5 cursor-pointer"
@@ -133,47 +173,33 @@ const Cart = () => {
             </div>
           ))}
 
-          {/* Total keranjang dan tombol checkout */}
           <div className="flex justify-end my-20">
             <div className="w-full sm:w-[450px]">
-              <div className="w-full">
-                <div className="text-2xl">
-                  <Title text1={'CART'} text2={'TOTALS'} />
+              <div className="text-2xl">
+                <Title text1={'CART'} text2={'TOTALS'} />
+              </div>
+              <div className="flex flex-col gap-2 mt-2 text-sm">
+                <div className="flex justify-between">
+                  <p>Subtotal</p>
+                  <p>{currency} {subtotal.toFixed(2)}</p>
                 </div>
-                <div className="flex flex-col gap-2 mt-2 text-sm">
-                  <div className="flex justify-between">
-                    <p>Subtotal</p>
-                    <p>
-                      {currency} {subtotal.toFixed(2)}
-                    </p>
-                  </div>
-                  <hr />
-                  <div className="flex justify-between">
-                    <p>Shipping Fee</p>
-                    <p>
-                      {currency} {subtotal === 0 ? '0.00' : deliveryFee.toFixed(2)}
-                    </p>
-                  </div>
-                  <hr />
-                  <div className="flex justify-between">
-                    <b>Total</b>
-                    <b>
-                      {currency}{' '}
-                      {subtotal === 0
-                        ? '0.00'
-                        : (subtotal + deliveryFee).toFixed(2)}
-                    </b>
-                  </div>
+                <hr />
+                <div className="flex justify-between">
+                  <p>Shipping Fee</p>
+                  <p>{currency} {subtotal === 0 ? '0.00' : deliveryFee.toFixed(2)}</p>
+                </div>
+                <hr />
+                <div className="flex justify-between">
+                  <b>Total</b>
+                  <b>{currency} {(subtotal + deliveryFee).toFixed(2)}</b>
                 </div>
               </div>
-              <div className="w-full text-end ">
-                <button
-                  onClick={() => navigate('/place-order')}
-                  className="bg-black text-white text-sm my-8 px-8 py-3"
-                >
-                  PROCEED TO CHECKOUT
-                </button>
-              </div>
+              <button
+                onClick={handleCheckout}
+                className="bg-black text-white text-sm my-8 px-8 py-3"
+              >
+                PROCEED TO CHECKOUT
+              </button>
             </div>
           </div>
         </div>
@@ -183,4 +209,3 @@ const Cart = () => {
 };
 
 export default Cart;
-

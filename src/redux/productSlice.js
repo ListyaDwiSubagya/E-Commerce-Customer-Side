@@ -8,7 +8,13 @@ export const fetchProducts = createAsyncThunk(
     if (!response.ok) {
       throw new Error('Failed to fetch products');
     }
-    return await response.json();
+    const products = await response.json();
+
+    // Tambahkan properti quantity default
+    return products.map((product) => ({
+      ...product,
+      quantity: 20, // Default quantity
+    }));
   }
 );
 
@@ -20,7 +26,10 @@ export const fetchProductById = createAsyncThunk(
     if (!response.ok) {
       throw new Error('Failed to fetch product details');
     }
-    return await response.json();
+    const product = await response.json();
+
+    // Tambahkan properti quantity jika tidak ada
+    return { ...product, quantity: product.quantity || 20 };
   }
 );
 
@@ -36,7 +45,18 @@ const initialState = {
 const productSlice = createSlice({
   name: 'products',
   initialState,
-  reducers: {},
+  reducers: {
+    // Action untuk mengurangi stok produk
+    reduceStock: (state, action) => {
+      const { items } = action.payload;
+      items.forEach(({ productId, quantity }) => {
+        const product = state.products.find((item) => item.id === productId);
+        if (product && product.quantity >= quantity) {
+          product.quantity -= quantity; // Kurangi stok hanya jika mencukupi
+        }
+      });
+    },
+  },
   extraReducers: (builder) => {
     builder
       // Reducer untuk fetchProducts
@@ -46,7 +66,7 @@ const productSlice = createSlice({
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false;
-        state.products = action.payload;
+        state.products = action.payload; // Produk dengan quantity default
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
@@ -68,5 +88,8 @@ const productSlice = createSlice({
   },
 });
 
-// Hanya satu kali ekspor di bagian ini
+// Ekspor actions
+export const { reduceStock } = productSlice.actions;
+
+// Ekspor reducer
 export default productSlice.reducer;

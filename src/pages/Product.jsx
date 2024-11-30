@@ -11,10 +11,10 @@ const Product = () => {
 
   // Ambil data dari Redux
   const { products, loading } = useSelector((state) => state.products);
+  const { isLoggedIn } = useSelector((state) => state.user);
 
   const [productData, setProductData] = useState(null);
   const [image, setImage] = useState('');
-  const { isLoggedIn } = useSelector((state) => state.user);
 
   useEffect(() => {
     if (!products.length) {
@@ -28,27 +28,27 @@ const Product = () => {
     if (product) {
       setProductData(product);
       setImage(product.image);
-      console.log('Selected Product ID:', product.id); // Log ID ke console
     }
   }, [productId, products]);
-  
+
   const handleAddToCart = () => {
     if (!isLoggedIn) {
       navigate('/login');
-    } else if (productData) { // Pastikan productData sudah tersedia
-      dispatch(addToCart({ productId: productData.id, size: 'M', quantity: 1 }));
-      console.log('Added to Cart:', {
-        productId: productData.id,
-        size: 'M',
-        quantity: 1,
-      }); // Log data yang ditambahkan ke cart
+    } else if (productData) {
+      if (productData.quantity > 0) {
+        dispatch(addToCart({ productId: productData.id, size: 'M', quantity: 1 }));
+        console.log('Added to Cart:', {
+          productId: productData.id,
+          size: 'M',
+          quantity: 1,
+        });
+      } else {
+        console.error('Out of stock!');
+      }
     } else {
       console.error('Product data is not available yet!');
     }
   };
-  
-  
-  
 
   if (loading) {
     return <div>Loading...</div>;
@@ -69,17 +69,23 @@ const Product = () => {
         <div className='flex-1'>
           <h1 className='font-medium text-2xl mt-2'>{productData.title}</h1>
           <div className='flex items-center gap-1 mt-2'>
+            <p className='text-gray-500 text-sm'>
+              Stock: {productData.quantity > 0 ? productData.quantity : 'Out of stock'}
+            </p>
           </div>
           <p className='mt-4 text-3xl font-medium'>${productData.price}</p>
           <h1 className='text-gray-600 text-xl mt-3'>{productData.category}</h1>
           <p className='mt-5 text-gray-500 md:w-4/5'>{productData.description}</p>
           <button
             onClick={handleAddToCart}
-            className={`bg-black text-white px-8 py-3 text-sm mt-5`}
+            className={`bg-black text-white px-8 py-3 text-sm mt-5 ${
+              productData.quantity === 0 ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+            disabled={productData.quantity === 0}
           >
-            ADD TO CART
+            {productData.quantity === 0 ? 'Out of Stock' : 'ADD TO CART'}
           </button>
-          <hr className='mt-8 sm:w-4/5'/>
+          <hr className='mt-8 sm:w-4/5' />
           <div className='text-sm text-gray-500 mt-5 flex flex-col gap-1'>
             <p>100% Original product</p>
             <p>Cash on delivery is available on this product.</p>
@@ -88,21 +94,24 @@ const Product = () => {
         </div>
       </div>
 
-         {/* Description & Review */}
-         <div className='mt-20'>
+      {/* Description & Review */}
+      <div className='mt-20'>
         <div className='flex'>
           <b className='border px-5 py-3 text-sm'>Description</b>
           <p className='border px-5 py-3 text-sm'>Reviews (122)</p>
-       </div>
-       <div className='flex flex-col border px-6 py-6 text-sm text-gray-500'>
-        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cumque asperiores quasi suscipit blanditiis repellat est inventore ea voluptate, impedit iste?</p>
-        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Nulla excepturi fugit deserunt?</p>
-       </div>
+        </div>
+        <div className='flex flex-col border px-6 py-6 text-sm text-gray-500'>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cumque
+            asperiores quasi suscipit blanditiis repellat est inventore ea
+            voluptate, impedit iste?
+          </p>
+          <p>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Nulla
+            excepturi fugit deserunt?
+          </p>
+        </div>
       </div>
-
-        {/* Related Products */}
-
-
     </div>
   );
 };
