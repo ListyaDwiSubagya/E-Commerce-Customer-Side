@@ -50,11 +50,22 @@ const productSlice = createSlice({
     reduceStock: (state, action) => {
       const { items } = action.payload;
       items.forEach(({ productId, quantity }) => {
-        const product = state.products.find((item) => item.id === productId);
-        if (product && product.quantity >= quantity) {
-          product.quantity -= quantity; // Kurangi stok hanya jika mencukupi
+        const productIndex = state.products.findIndex((item) => item.id === productId);
+        if (productIndex !== -1) {
+          const product = state.products[productIndex];
+
+          // Validasi: Jangan kurangi stok di bawah nol
+          if (product.quantity >= quantity) {
+            product.quantity -= quantity;
+          } else {
+            console.warn(`Stock for product ID ${productId} is insufficient!`);
+          }
         }
       });
+    },
+    // Reset detail produk saat pindah halaman
+    resetProductDetails: (state) => {
+      state.productDetails = null;
     },
   },
   extraReducers: (builder) => {
@@ -89,7 +100,7 @@ const productSlice = createSlice({
 });
 
 // Ekspor actions
-export const { reduceStock } = productSlice.actions;
+export const { reduceStock, resetProductDetails } = productSlice.actions;
 
 // Ekspor reducer
 export default productSlice.reducer;

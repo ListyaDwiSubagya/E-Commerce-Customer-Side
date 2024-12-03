@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import Title from '../components/Title';
 import { assets } from '../assets/assets';
-import { updateCart } from '../redux/cartSlice';
+import { updateCart, clearCart } from '../redux/cartSlice';
 import { reduceStock } from '../redux/productSlice'; // Import action untuk mengurangi stok
 import { useNavigate } from 'react-router-dom';
 
@@ -12,12 +12,12 @@ const Cart = () => {
 
   const { products } = useSelector((state) => state.products);
   const cartItems = useSelector((state) => state.cart.cartItems);
-  const currency = '$'; // Sesuaikan dengan currency Anda.
+  const currency = '$'; // Currency aplikasi Anda.
 
   const [cartData, setCartData] = useState([]);
   const [subtotal, setSubtotal] = useState(0);
   const [deliveryFee, setDeliveryFee] = useState(0);
-  const [stockWarnings, setStockWarnings] = useState({}); // State untuk menyimpan pesan peringatan stok
+  const [stockWarnings, setStockWarnings] = useState({});
 
   useEffect(() => {
     if (products.length > 0) {
@@ -26,7 +26,7 @@ const Cart = () => {
 
       for (const productId in cartItems) {
         for (const size in cartItems[productId]) {
-          const product = products.find((item) => String(item.id) === String(productId)); // Cari produk berdasarkan id
+          const product = products.find((item) => String(item.id) === String(productId));
           if (product) {
             const itemTotal = product.price * cartItems[productId][size];
             tempSubtotal += itemTotal;
@@ -38,7 +38,7 @@ const Cart = () => {
               image: product.image,
               name: product.title,
               price: product.price,
-              stock: product.quantity, // Gunakan stok aktual dari Redux
+              stock: product.quantity,
               total: itemTotal,
             });
           }
@@ -48,24 +48,18 @@ const Cart = () => {
       setCartData(tempData);
       setSubtotal(tempSubtotal);
 
-      // Tentukan biaya pengiriman berdasarkan subtotal
-      if (tempSubtotal > 100) {
-        setDeliveryFee(0);
-      } else {
-        setDeliveryFee(10);
-      }
+      // Hitung biaya pengiriman
+      setDeliveryFee(tempSubtotal > 100 ? 0 : 10);
     }
   }, [cartItems, products]);
 
   const handleQuantityChange = (productId, size, quantity) => {
     if (!quantity || quantity < 1) return;
 
-    const product = cartData.find(
-      (item) => item._id === productId && item.size === size
-    );
+    const product = cartData.find((item) => item._id === productId && item.size === size);
 
     if (product && quantity > product.stock) {
-      // Jika jumlah melebihi stok
+      // Jika stok tidak mencukupi
       setStockWarnings((prev) => ({
         ...prev,
         [`${productId}-${size}`]: `Only ${product.stock} in stock!`,
@@ -86,27 +80,33 @@ const Cart = () => {
   };
 
   const handleCheckout = () => {
+    // Validasi stok sebelum checkout
     const outOfStockItems = cartData.filter((item) => item.quantity > item.stock);
 
     if (outOfStockItems.length > 0) {
-      // Tampilkan pesan peringatan untuk item yang stoknya tidak mencukupi
+      // Tampilkan peringatan jika stok tidak mencukupi
       const warnings = {};
       outOfStockItems.forEach((item) => {
         warnings[`${item._id}-${item.size}`] = `Only ${item.stock} in stock!`;
       });
       setStockWarnings(warnings);
-      alert('Some items have insufficient stock. Please adjust your cart.');
-    } else {
-      // Kurangi stok di Redux
-      const itemsToReduce = cartData.map((item) => ({
-        productId: item._id,
-        quantity: item.quantity,
-      }));
-      dispatch(reduceStock({ items: itemsToReduce }));
 
-      // Navigasi ke halaman place-order
-      navigate('/place-order');
+      alert('Some items have insufficient stock. Please adjust your cart.');
+      return;
     }
+
+    // Update stok di Redux
+    const itemsToReduce = cartData.map((item) => ({
+      productId: item._id,
+      quantity: item.quantity,
+    }));
+    dispatch(reduceStock({ items: itemsToReduce }));
+
+    // Bersihkan keranjang
+    dispatch(clearCart());
+
+    // Navigasi ke halaman place-order
+    navigate('/place-order');
   };
 
   return (
@@ -161,7 +161,7 @@ const Cart = () => {
                   className="border max-w-10 sm:max-w-20 px-1 sm:px-2 py-1"
                   type="number"
                   min={1}
-                  defaultValue={item.quantity}
+                  value={item.quantity}
                 />
               </div>
               <img
