@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import Title from '../components/Title';
-import { assets } from '../assets/assets';
 import { useNavigate } from 'react-router-dom';
+import Title from '../components/Title';
+import Paypal from '../components/Paypal'; // Import komponen PayPal
+import { assets } from '../assets/assets';
 
 const PlaceOrder = () => {
   const [method, setMethod] = useState('cod');
@@ -12,19 +13,19 @@ const PlaceOrder = () => {
   // Mengambil data dari Redux
   const cartItems = useSelector((state) => state.cart.cartItems);
   const products = useSelector((state) => state.products.products);
+  
 
   const [subtotal, setSubtotal] = useState(0);
   const deliveryFee = 5.0; // Contoh biaya pengiriman tetap
 
   // Menghitung subtotal berdasarkan data keranjang
   useEffect(() => {
-    if (products.length > 0 && cartItems) {
-      const tempSubtotal = Object.keys(cartItems).reduce((acc, productId) => {
+    if (products.length > 0) {
+      const tempSubtotal = Object.entries(cartItems).reduce((acc, [productId, sizes]) => {
         const product = products.find((item) => String(item.id) === String(productId));
         if (product) {
-          const sizes = cartItems[productId];
-          const productTotal = Object.keys(sizes).reduce(
-            (sizeAcc, size) => sizeAcc + sizes[size] * product.price,
+          const productTotal = Object.values(sizes).reduce(
+            (sizeAcc, quantity) => sizeAcc + quantity * product.price,
             0
           );
           return acc + productTotal;
@@ -34,6 +35,12 @@ const PlaceOrder = () => {
       setSubtotal(tempSubtotal);
     }
   }, [cartItems, products]);
+
+  const handlePaypalSuccess = (details) => {
+    console.log('PayPal Payment Successful:', details);
+    alert(`Transaction completed by ${details.payer.name.given_name}`);
+    navigate('/'); // Redirect setelah pembayaran berhasil
+  };
 
   return (
     <form className="flex flex-col sm:flex-row justify-between gap-4 pt-5 sm:pt-14 min-h-[80vh] border-t">
@@ -65,9 +72,9 @@ const PlaceOrder = () => {
         <div className="mt-12">
           <Title text1={'PAYMENT'} text2={'METHOD'} />
           <div className="flex gap-3 flex-col lg:flex-row">
-            <div onClick={() => setMethod('stripe')} className="flex items-center gap-3 border px-3 p-2 cursor-pointer">
-              <p className={`min-w-3.5 h-3.5 border rounded-full ${method === 'stripe' ? 'bg-green-400' : ''}`}></p>
-              <img className="h-5 mx-4" src={assets.stripe_logo} alt="Stripe" />
+            <div onClick={() => setMethod('paypal')} className="flex items-center gap-3 border px-3 p-2 cursor-pointer">
+              <p className={`min-w-3.5 h-3.5 border rounded-full ${method === 'paypal' ? 'bg-green-400' : ''}`}></p>
+              <img className="h-5 mx-4" src={assets.paypal_logo} alt="PayPal" />
             </div>
             <div onClick={() => setMethod('cod')} className="flex items-center gap-3 border px-3 p-2 cursor-pointer">
               <p className={`min-w-3.5 h-3.5 border rounded-full ${method === 'cod' ? 'bg-green-400' : ''}`}></p>
@@ -96,7 +103,7 @@ const PlaceOrder = () => {
                     </p>
                   </div>
                   <hr />
-                  <div className="flex justify-between">
+                  <div className="flex justify-between mb-5">
                     <b>Total</b>
                     <b>
                       {currency} {(subtotal + deliveryFee).toFixed(2)}
@@ -104,13 +111,18 @@ const PlaceOrder = () => {
                   </div>
                 </div>
               </div>
-              <div className="w-full text-end ">
-                <button
-                  onClick={() => navigate('/')}
-                  className="bg-black text-white text-sm my-8 px-8 py-3"
-                >
-                  PROCEED TO CHECKOUT
-                </button>
+              <div className="w-full text-end">
+                {method === 'paypal' && (
+                  <Paypal amount={(subtotal + deliveryFee).toFixed(2)} onSuccess={handlePaypalSuccess} />
+                )}
+                {method === 'cod' && (
+                  <button
+                    onClick={() => navigate('/')}
+                    className="bg-black text-white text-sm my-8 px-8 py-3"
+                  >
+                    PROCEED TO CHECKOUT
+                  </button>
+                )}
               </div>
             </div>
           </div>

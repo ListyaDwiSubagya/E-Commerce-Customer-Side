@@ -50,6 +50,8 @@ const Cart = () => {
 
       // Hitung biaya pengiriman
       setDeliveryFee(tempSubtotal > 100 ? 0 : 10);
+
+      
     }
   }, [cartItems, products]);
 
