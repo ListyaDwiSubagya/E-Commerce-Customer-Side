@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { toast } from 'react-toastify';
 
 const Paypal = ({ amount, onSuccess }) => {
   const paypalRef = useRef();
@@ -22,13 +23,12 @@ const Paypal = ({ amount, onSuccess }) => {
         onApprove: (data, actions) => {
           return actions.order.capture().then((details) => {
             onSuccess(details); // Kirim data pembayaran ke fungsi sukses
-            alert(`Transaction completed by ${details.payer.name.given_name}`);
           });
         },
         // Ketika pembayaran gagal
         onError: (err) => {
           console.error('PayPal Checkout Error:', err);
-          alert('An error occurred with PayPal Checkout');
+         toast.error('An error occurred with PayPal Checkout')
         },
       }).render(paypalRef.current);
     }

@@ -4,19 +4,23 @@ import { useNavigate } from 'react-router-dom';
 import Title from '../components/Title';
 import Paypal from '../components/Paypal'; // Import komponen PayPal
 import { assets } from '../assets/assets';
+import { useLocation } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
+// Dalam komponen PlaceOrder
 
 const PlaceOrder = () => {
   const [method, setMethod] = useState('cod');
   const navigate = useNavigate();
   const currency = '$';
-
+  
   // Mengambil data dari Redux
   const cartItems = useSelector((state) => state.cart.cartItems);
   const products = useSelector((state) => state.products.products);
   
-
-  const [subtotal, setSubtotal] = useState(0);
-  const deliveryFee = 5.0; // Contoh biaya pengiriman tetap
+  const location = useLocation();
+  const { subtotal = 0 } = location.state || {};
+  const deliveryFee = 5.00;
 
   // Menghitung subtotal berdasarkan data keranjang
   useEffect(() => {
@@ -32,13 +36,12 @@ const PlaceOrder = () => {
         }
         return acc;
       }, 0);
-      setSubtotal(tempSubtotal);
+ 
     }
   }, [cartItems, products]);
 
   const handlePaypalSuccess = (details) => {
-    console.log('PayPal Payment Successful:', details);
-    alert(`Transaction completed by ${details.payer.name.given_name}`);
+    toast.success(`Transaction completed by ${details.payer.name.given_name}`);
     navigate('/'); // Redirect setelah pembayaran berhasil
   };
 

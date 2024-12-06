@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../redux/userSlice'; 
 import { assets } from '../assets/assets';
+import { toast } from 'react-toastify';
 
 const Navbar = () => {
     const [visible, setVisible] = useState(false);
@@ -25,6 +26,7 @@ const Navbar = () => {
         
         // Dispatch action logout ke Redux
         dispatch(logout());
+        toast.success('Logout successful!');
     };
 
     return (

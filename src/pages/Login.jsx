@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../redux/userSlice'; 
+import { toast } from 'react-toastify';
 
 const Login = () => {
   const [currentState, setCurrentState] = useState('Login');
@@ -28,6 +29,7 @@ const Login = () => {
       dispatch(login({ token, userData: user })); // Simpan data pengguna di Redux
       localStorage.setItem('token', token); // Simpan token di localStorage
       navigate('/'); // Redirect ke halaman utama setelah login
+      toast.success('Login successful! Welcome back!');
     } else {
       toast.error('Invalid email or password');
     }
