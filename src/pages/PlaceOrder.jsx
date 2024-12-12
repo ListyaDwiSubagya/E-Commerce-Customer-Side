@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector,useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import Title from '../components/Title';
 import Paypal from '../components/Paypal'; // Import komponen PayPal
 import { assets } from '../assets/assets';
 import { useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { reduceStock } from '../redux/productSlice';
 
 // Dalam komponen PlaceOrder
 
@@ -13,7 +14,7 @@ const PlaceOrder = () => {
   const [method, setMethod] = useState('cod');
   const navigate = useNavigate();
   const currency = '$';
-  
+  const dispatch = useDispatch();
   // Mengambil data dari Redux
   const cartItems = useSelector((state) => state.cart.cartItems);
   const products = useSelector((state) => state.products.products);
@@ -43,6 +44,19 @@ const PlaceOrder = () => {
   const handlePaypalSuccess = (details) => {
     toast.success(`Transaction completed by ${details.payer.name.given_name}`);
     navigate('/'); // Redirect setelah pembayaran berhasil
+  };
+
+  const handleCheckoutSuccess = () => {
+    const itemsToReduce = Object.entries(cartItems).map(([productId, sizes]) => {
+      const totalQuantity = Object.values(sizes).reduce((acc, qty) => acc + qty, 0);
+      return { productId: parseInt(productId, 10), quantity: totalQuantity };
+    });
+  
+    // Dispatch reduceStock dengan format data yang benar
+    dispatch(reduceStock({ items: itemsToReduce }));
+  
+    toast.success('Checkout successful!');
+    navigate('/');
   };
 
   return (
@@ -120,7 +134,7 @@ const PlaceOrder = () => {
                 )}
                 {method === 'cod' && (
                   <button
-                    onClick={() => navigate('/')}
+                     onClick={handleCheckoutSuccess}
                     className="bg-black text-white text-sm my-8 px-8 py-3"
                   >
                     PROCEED TO CHECKOUT

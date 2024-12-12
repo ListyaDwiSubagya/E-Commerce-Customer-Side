@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchProducts } from '../redux/productSlice';
 import { addToCart } from '../redux/cartSlice';
-import { reduceStock } from '../redux/productSlice'; 
 
 
 const Product = () => {
@@ -38,16 +37,7 @@ const Product = () => {
       navigate('/login');
     } else if (productData) {
       if (productData.quantity > 0) {
-        // Kurangi stok di Redux
-        // dispatch(
-        //   reduceStock({
-        //     items: [
-        //       { productId: productData.id, quantity: 1 }, 
-        //     ],
-        //   })
-        // );
-  
-        // Tambahkan ke keranjang
+
         dispatch(addToCart({ productId: productData.id, size: 'M', quantity: 1 }));
   
         console.log('Added to Cart:', {

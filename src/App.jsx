@@ -12,7 +12,7 @@ import Login from './pages/Login'
 import PlaceOrder from './pages/PlaceOrder'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
-import SearchBar from './components/SearchBar'
+
 import PrivateRoute from './components/PrivateRoute'; 
 import { ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -23,7 +23,7 @@ const App = () => {
     <Provider store={store}>
       <ToastContainer/>
       <Navbar/>
-      <SearchBar/>
+      
       <Routes>
         <Route path='/' element={<Home/>}/>
         <Route path='/collection' element={<Collection/>}/>

@@ -10,15 +10,15 @@ export const fetchProducts = createAsyncThunk(
     }
     const products = await response.json();
 
-    // Tambahkan properti quantity default
+    // Tambahkan properti quantity default jika tidak ada
     return products.map((product) => ({
       ...product,
-      quantity: 20, // Default quantity
+      quantity: product.quantity || 20, // Default quantity
     }));
   }
 );
 
-// Thunk untuk mengambil detail produk berdasarkan id
+// Thunk untuk mengambil detail produk berdasarkan ID
 export const fetchProductById = createAsyncThunk(
   'products/fetchProductById',
   async (id) => {
@@ -49,17 +49,19 @@ const productSlice = createSlice({
     // Action untuk mengurangi stok produk
     reduceStock: (state, action) => {
       const { items } = action.payload;
-      items.forEach(({ productId, quantity }) => {
-        const productIndex = state.products.findIndex((item) => item.id === productId);
-        if (productIndex !== -1) {
-          const product = state.products[productIndex];
 
+      items.forEach(({ productId, quantity }) => {
+        const product = state.products.find((item) => item.id === productId);
+
+        if (product) {
           // Validasi: Jangan kurangi stok di bawah nol
           if (product.quantity >= quantity) {
             product.quantity -= quantity;
           } else {
-            console.warn(`Stock for product ID ${productId} is insufficient!`);
+            console.warn(`Insufficient stock for product ID ${productId}!`);
           }
+        } else {
+          console.warn(`Product ID ${productId} not found.`);
         }
       });
     },

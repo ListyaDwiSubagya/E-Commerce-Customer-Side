@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import Title from '../components/Title';
 import { assets } from '../assets/assets';
 import { updateCart, clearCart } from '../redux/cartSlice';
-import { reduceStock } from '../redux/productSlice'; // Import action untuk mengurangi stok
+import { reduceStock } from '../redux/productSlice'; 
 import { useNavigate } from 'react-router-dom';
 
 const Cart = () => {

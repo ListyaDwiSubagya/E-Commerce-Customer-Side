@@ -29,7 +29,7 @@ const Login = () => {
       dispatch(login({ token, userData: user })); // Simpan data pengguna di Redux
       localStorage.setItem('token', token); // Simpan token di localStorage
       navigate('/'); // Redirect ke halaman utama setelah login
-      toast.success('Login successful! Welcome back!');
+      toast.success('Login successful!');
     } else {
       toast.error('Invalid email or password');
     }
