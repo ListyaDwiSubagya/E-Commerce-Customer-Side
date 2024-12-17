@@ -12,7 +12,7 @@ const Cart = () => {
 
   const { products } = useSelector((state) => state.products);
   const cartItems = useSelector((state) => state.cart.cartItems);
-  const currency = '$'; // Currency aplikasi Anda.
+  const currency = '$'; 
 
   const [cartData, setCartData] = useState([]);
   const [subtotal, setSubtotal] = useState(0);

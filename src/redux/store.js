@@ -1,4 +1,4 @@
-import { configureStore } from '@reduxjs/toolkit'; // Ganti createStore dengan configureStore
+import { configureStore } from '@reduxjs/toolkit'; 
 import userReducer from './userSlice';
 import cartReducer from './cartSlice';
 import productReducer from './productSlice';
