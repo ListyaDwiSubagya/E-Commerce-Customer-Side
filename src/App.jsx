@@ -23,7 +23,6 @@ const App = () => {
     <Provider store={store}>
       <ToastContainer/>
       <Navbar/>
-      
       <Routes>
         <Route path='/' element={<Home/>}/>
         <Route path='/collection' element={<Collection/>}/>

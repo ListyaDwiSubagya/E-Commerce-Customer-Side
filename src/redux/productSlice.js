@@ -10,10 +10,10 @@ export const fetchProducts = createAsyncThunk(
     }
     const products = await response.json();
 
-    // Tambahkan properti quantity default jika tidak ada
+    
     return products.map((product) => ({
       ...product,
-      quantity: product.quantity || 20, // Default quantity
+      quantity: product.quantity || 20, 
     }));
   }
 );
@@ -35,10 +35,10 @@ export const fetchProductById = createAsyncThunk(
 
 // Initial state
 const initialState = {
-  products: [], // Daftar semua produk
-  productDetails: null, // Detail produk yang dipilih
-  loading: false, // Indikator loading
-  error: null, // Menyimpan pesan error
+  products: [], 
+  productDetails: null, 
+  loading: false, 
+  error: null, 
 };
 
 // Slice untuk produk
@@ -54,7 +54,7 @@ const productSlice = createSlice({
         const product = state.products.find((item) => item.id === productId);
 
         if (product) {
-          // Validasi: Jangan kurangi stok di bawah nol
+        
           if (product.quantity >= quantity) {
             product.quantity -= quantity;
           } else {
@@ -79,7 +79,7 @@ const productSlice = createSlice({
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false;
-        state.products = action.payload; // Produk dengan quantity default
+        state.products = action.payload; 
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
@@ -101,8 +101,8 @@ const productSlice = createSlice({
   },
 });
 
-// Ekspor actions
+
 export const { reduceStock, resetProductDetails } = productSlice.actions;
 
-// Ekspor reducer
+
 export default productSlice.reducer;

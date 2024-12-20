@@ -43,7 +43,7 @@ const PlaceOrder = () => {
 
   const handlePaypalSuccess = (details) => {
     toast.success(`Transaction completed by ${details.payer.name.given_name}`);
-    navigate('/'); // Redirect setelah pembayaran berhasil
+    navigate('/'); 
   };
 
   const handleCheckoutSuccess = () => {

@@ -12,8 +12,8 @@ const Login = () => {
   const navigate = useNavigate();
 
   // Simulasi data pengguna default untuk demo login
-  const defaultEmail = 'johndoe@example.com'; 
-  const defaultPassword = '12345'; 
+  const defaultEmail = 'john@gmail.com'; 
+  const defaultPassword = 'm38rmF$'; 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,10 +25,10 @@ const Login = () => {
 
     // Periksa apakah pengguna valid dan password sesuai
     if (user && user.password === password) {
-      const token = 'fake-jwt-token'; // Simulasi token
-      dispatch(login({ token, userData: user })); // Simpan data pengguna di Redux
-      localStorage.setItem('token', token); // Simpan token di localStorage
-      navigate('/'); // Redirect ke halaman utama setelah login
+      const token = 'fake-jwt-token'; 
+      dispatch(login({ token, userData: user })); 
+      localStorage.setItem('token', token); 
+      navigate('/'); 
       toast.success('Login successful!');
     } else {
       toast.error('Invalid email or password');

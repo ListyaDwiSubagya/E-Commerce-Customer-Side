@@ -9,7 +9,7 @@ const BestSeller = () => {
     const { products, loading, error } = useSelector((state) => state.products);
 
     useEffect(() => {
-        dispatch(fetchProducts()); // Panggil thunk untuk fetch data
+        dispatch(fetchProducts()); 
     }, [dispatch]);
 
     // Pilih 5 produk secara acak jika data ada
@@ -35,7 +35,7 @@ const BestSeller = () => {
                         <ProductItem
                             key={item.id}
                             id={item.id}
-                            image={[item.image]} // Mengirimkan array image
+                            image={[item.image]} 
                             name={item.title}
                             price={item.price}
                         />
